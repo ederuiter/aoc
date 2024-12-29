@@ -4,33 +4,36 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
 )
 
 func win2(ax int64, ay int64, bx int64, by int64, prizeX int64, prizeY int64) (int64, int64, int64) {
-	tokens := int64(0)
-	winA := int64(0)
-	winB := int64(0)
+	/*
+			(ax*a)+(bx*b) == prizeX
+			a=(priceX - bx*b)/ax
+			a=(priceX/ax) - b*(bx/ax)
 
-	maxA := max(prizeX/ax, prizeY/ay)
-	for a := int64(0); a <= maxA; a++ {
-		x := prizeX - (ax * a)
-		y := prizeY - (ay * a)
-		if x%bx == 0 {
-			b := x / bx
-			if y-(b*by) == 0 {
-				costs := 3*a + b
-				if tokens == 0 || costs < tokens {
-					tokens = costs
-					winA = a
-					winB = b
-				}
-			}
-		}
+			(ay*a)+(by*b) == prizeY
+			a=(priceY -by*b)/ay
+			a=(priceY/ay - b*(by/ay)
+
+			(priceX/ax) - b*(bx/ax) = (priceY/ay) - b*(by/ay)
+		    b = ((priceY/ay) - (priceX/ax)) / ((by/ay)-(bx/ax))
+
+	*/
+
+	b := int64(math.Round(((float64(prizeY) / float64(ay)) - (float64(prizeX) / float64(ax))) / ((float64(by) / float64(ay)) - (float64(bx) / float64(ax)))))
+	a := int64(math.Round((float64(prizeX) / float64(ax)) - float64(b)*(float64(bx)/float64(ax))))
+
+	if (ax*a)+(bx*b) == prizeX && (ay*a)+(by*b) == prizeY {
+		t := (3 * a) + b
+		return t, a, b
 	}
-	return tokens, winA, winB
+
+	return 0, -1, -1
 }
 
 func parse2(text string, offset int64, re *regexp.Regexp) (int64, int64) {
@@ -41,7 +44,7 @@ func parse2(text string, offset int64, re *regexp.Regexp) (int64, int64) {
 }
 
 func main() {
-	file, err := os.Open("input.txt")
+	file, err := os.Open("test.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
